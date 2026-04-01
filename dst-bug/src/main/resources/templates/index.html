@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DST Bug Demo</title>
+    <style>
+        body { font-family: monospace; max-width: 960px; margin: 40px auto; padding: 0 20px; background: #0d1117; color: #e6edf3; }
+        h1 { font-size: 1.3rem; margin-bottom: 4px; }
+        .subtitle { color: #8b949e; font-size: 0.85rem; margin-bottom: 32px; }
+        h2 { font-size: 1rem; margin: 32px 0 4px; }
+        .desc { color: #8b949e; font-size: 0.8rem; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; padding: 8px 12px; background: #161b22; color: #8b949e; border-bottom: 1px solid #30363d; }
+        td { padding: 7px 12px; border-bottom: 1px solid #21262d; }
+        tr:last-child td { border-bottom: none; }
+        .inverted td { background: #2d1b1b; }
+        .inverted .badge { color: #f85149; font-weight: bold; }
+        .ok { color: #3fb950; }
+    </style>
+</head>
+<body>
+
+<h1>DST Bug Demo - 2025-03-30 CET &rarr; CEST transition</h1>
+<p class="subtitle">All records stored as UTC in datetime2 columns. JVM timezone: Europe/Warsaw. DST transition at 01:00 UTC (local 02:00 &rarr; 03:00).</p>
+
+<h2>&#10060; JdbcUtils.getResultSetValue() - getTimestamp() without Calendar</h2>
+<p class="desc">Driver interprets datetime2 as local time, applies JVM timezone. Near DST boundary, inconsistent offsets produce inverted timestamps.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>intervalStart (UTC stored)</th>
+            <th>intervalEnd (UTC stored)</th>
+            <th>Valid?</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="row : ${buggyRows}" th:classappend="${row.inverted} ? 'inverted'">
+            <td th:text="${row.description}"></td>
+            <td th:text="${row.intervalStart.toString('yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${row.intervalEnd.toString('yyyy-MM-dd HH:mm:ss')}"></td>
+            <td>
+                <span th:if="${row.inverted}" class="badge">&#9888; START &gt; END</span>
+                <span th:unless="${row.inverted}" class="ok">OK</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>&#10004;&#65039; rs.getObject(col, java.time.LocalDateTime.class)</h2>
+<p class="desc">JDBC 4.2+ returns the raw datetime2 value without timezone conversion. UTC values come back exactly as stored.</p>
+<table>
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>intervalStart (UTC stored)</th>
+            <th>intervalEnd (UTC stored)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="row : ${fixedRows}">
+            <td th:text="${row.description}"></td>
+            <td th:text="${row.intervalStart.toString('yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${row.intervalEnd.toString('yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
