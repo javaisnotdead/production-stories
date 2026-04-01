@@ -1,6 +1,6 @@
 # DST Bug Demo
 
-Demo application for the article **"The Hour That Doesn't Exist"** on [javaisnotdead.com](https://javaisnotdead.com).
+Demo application for the article [The Hour That Doesn't Exist](https://www.javaisnotdead.com/the-hour-that-doesnt-exist/).
 
 Demonstrates a DST bug in JDBC timestamp retrieval from SQL Server `datetime2` columns.
 
