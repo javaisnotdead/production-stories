@@ -25,7 +25,7 @@ docker compose up --build
 
 Then open [http://localhost:8080](http://localhost:8080).
 
-The UI shows two tables with the same 5 records:
+The UI shows two tables with the same 4 records:
 - **Top table** - buggy read path: `JdbcUtils.getResultSetValue()` - timestamps distorted near DST boundary, last record inverted
 - **Bottom table** - fixed read path: `rs.getObject(col, java.time.LocalDateTime.class)` - UTC values as stored
 
